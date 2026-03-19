@@ -13,7 +13,7 @@ interface ThreadPreviewProps {
 export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl }) => {
     const [preview, setPreview] = useState<{
         url: string;
-        renderType: 'image' | 'video' | 'audio' | 'markdown';
+        renderType: 'image' | 'video' | 'audio' | 'markdown' | 'odysee';
         showPlayButton: boolean;
     } | null>(null);
     const [loading, setLoading] = useState(true);
@@ -39,6 +39,28 @@ export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl 
                     }
                 } catch (e) {
                     console.warn('Failed to fetch twitter preview:', e);
+                }
+            }
+
+            // Check for Odysee
+            const targetOdysee = (value?.includes('odysee.com') ? value : null) || (xUrl?.includes('odysee.com') ? xUrl : null);
+            if (targetOdysee) {
+                try {
+                    const res = await fetch(`/api/metadata/odysee?url=${encodeURIComponent(targetOdysee)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.thumbnail_url) {
+                            setPreview({
+                                url: data.thumbnail_url,
+                                renderType: 'odysee',
+                                showPlayButton: true
+                            });
+                            setLoading(false);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch odysee preview:', e);
                 }
             }
 
@@ -172,6 +194,12 @@ export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl 
                     preload="metadata"
                     muted
                     playsInline
+                />
+            ) : preview.renderType === 'odysee' ? (
+                <img
+                    src={preview.url}
+                    alt="Odysee Preview"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
                 />
             ) : preview.renderType === 'markdown' ? (
                 <div className="w-full h-full bg-metamask-orange/[0.05] flex flex-col items-center justify-center gap-2 group-hover/preview:bg-metamask-orange/[0.08] transition-colors">

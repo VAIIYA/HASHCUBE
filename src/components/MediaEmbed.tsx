@@ -9,7 +9,7 @@ interface MediaEmbedProps {
 }
 
 export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
-    const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio' | 'twitter' | 'markdown' | null>(null);
+    const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio' | 'twitter' | 'markdown' | 'odysee' | null>(null);
     const [src, setSrc] = useState<string>('');
     const [html, setHtml] = useState<string>('');
     const [markdownContent, setMarkdownContent] = useState<string>('');
@@ -63,6 +63,25 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                     }
                 } catch (e) {
                     console.warn('Failed to fetch twitter embed:', e);
+                }
+            }
+            
+            // Check for Odysee links
+            const odyseeUrl = values.find(v => v?.includes('odysee.com') && !v?.includes('/$/embed/'));
+            if (odyseeUrl) {
+                try {
+                    const res = await fetch(`/api/metadata/odysee?url=${encodeURIComponent(odyseeUrl)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.html) {
+                            setHtml(data.html);
+                            setMediaType('odysee');
+                            setLoading(false);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch odysee embed:', e);
                 }
             }
 
@@ -230,6 +249,12 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
             {mediaType === 'twitter' && (
                 <div
                     className="w-full max-w-[550px] p-4 bg-white"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                />
+            )}
+            {mediaType === 'odysee' && (
+                <div
+                    className="w-full max-w-4xl p-0 bg-black aspect-video rounded-2xl overflow-hidden"
                     dangerouslySetInnerHTML={{ __html: html }}
                 />
             )}
