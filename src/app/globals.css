@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-metamask-orange: #F6851B;
+  --color-metamask-purple: #3D065F;
+  --color-metamask-blue: #4362D1;
+  --color-metamask-beige: #F5ECE5;
+  --font-sans: 'Euclid Circular B', var(--font-geist-sans);
+  --radius-pill: 999px;
+}
+
+:root {
+  --background: #F5ECE5;
+  --foreground: #3D065F;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.pill-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
