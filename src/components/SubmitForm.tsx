@@ -40,10 +40,13 @@ export const SubmitForm: React.FC<SubmitFormProps> = ({ onSuccess, compact = fal
 
         // Detect X/Twitter Status URL
         const twitterRegex = /https?:\/\/(twitter\.com|x\.com)\/[a-zA-Z0-9_]+\/status\/\d+/;
-        if (twitterRegex.test(val)) {
+        const odyseeRegex = /https?:\/\/(www\.)?odysee\.com\/[^\s]+/;
+        
+        if (twitterRegex.test(val) || odyseeRegex.test(val)) {
             setFetchingMetadata(true);
             try {
-                const res = await fetch(`/api/metadata/twitter?url=${encodeURIComponent(val)}`);
+                const endpoint = twitterRegex.test(val) ? 'twitter' : 'odysee';
+                const res = await fetch(`/api/metadata/${endpoint}?url=${encodeURIComponent(val)}`);
                 if (res.ok) {
                     const data = await res.json();
                     setFormData(prev => ({
@@ -53,7 +56,7 @@ export const SubmitForm: React.FC<SubmitFormProps> = ({ onSuccess, compact = fal
                     }));
                 }
             } catch (error) {
-                console.error('Error fetching twitter metadata:', error);
+                console.error('Error fetching metadata:', error);
             } finally {
                 setFetchingMetadata(false);
             }
@@ -131,16 +134,16 @@ export const SubmitForm: React.FC<SubmitFormProps> = ({ onSuccess, compact = fal
 
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-metamask-purple/40 ml-4 italic">
-                    X.COM VIDEO URL (Optional)
+                    VIDEO URL (X.COM OR ODYSEE)
                 </label>
                 <Input
-                    placeholder="https://x.com/..."
+                    placeholder="https://x.com/... or https://odysee.com/..."
                     value={formData.xUrl}
                     onChange={(e) => handleXChange(e.target.value)}
                     disabled={fetchingMetadata}
                 />
                 {fetchingMetadata && (
-                    <p className="text-[10px] text-metamask-orange animate-pulse ml-4 italic">Fetching post metadata...</p>
+                    <p className="text-[10px] text-metamask-orange animate-pulse ml-4 italic">Fetching video metadata...</p>
                 )}
             </div>
 

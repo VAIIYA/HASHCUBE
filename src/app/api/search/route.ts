@@ -16,8 +16,6 @@ export async function GET(request: Request) {
         } else if (query) {
             sql += `AND (title LIKE ? OR description LIKE ?) `;
             args.push(`%${query}%`, `%${query}%`);
-        } else {
-            return NextResponse.json({ error: 'Query or tag parameter is required' }, { status: 400 });
         }
 
         sql += `ORDER BY createdAt DESC LIMIT 50`;
