@@ -27,6 +27,22 @@ export const isCID = (value: string): boolean => {
 };
 
 /**
+ * Attempts to fix common Base58btc typos in a CID (O->o, I->i, l->L, 0->o)
+ */
+export const fixCIDTypos = (value: string): string => {
+    if (!value) return value;
+    if (value.startsWith('Qm') && value.length === 46) {
+        // Replace invalid Base58btc characters with their likely intended counterparts
+        return value
+            .replace(/O/g, 'o')
+            .replace(/I/g, 'i')
+            .replace(/0/g, 'o')
+            .replace(/l/g, 'L');
+    }
+    return value;
+};
+
+/**
  * Extracts CID from a string that might be a full URL, storage path, or just the CID
  */
 export const extractCID = (value: string): string | null => {
@@ -37,11 +53,11 @@ export const extractCID = (value: string): string | null => {
     if (urlMatch && urlMatch[1]) return urlMatch[1];
 
     // Check if the value itself is a CID
-    if (isCID(value)) return value;
+    if (isCID(value)) return fixCIDTypos(value);
 
-    // Handle cases where the whole value might be a CIDv1 but didn't match the strict regex
+    // Handle cases where the whole value might be a CIDv1 but didn't match the regex
     if (value.startsWith('bafy') && value.length > 50) return value;
-    if (value.startsWith('Qm') && value.length === 46) return value;
+    if (value.startsWith('Qm') && value.length === 46) return fixCIDTypos(value);
 
     return null;
 };

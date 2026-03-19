@@ -134,11 +134,31 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                                 setSrc(url);
                                 setMediaType('audio');
                                 return true;
-                            } else if (contentType?.includes('markdown') || contentType?.startsWith('text/markdown') || url.toLowerCase().endsWith('.md')) {
+                            } else if (
+                                contentType?.includes('markdown') || 
+                                contentType?.startsWith('text/markdown') || 
+                                contentType?.startsWith('text/plain') ||
+                                url.toLowerCase().endsWith('.md')
+                            ) {
                                 try {
                                     const textRes = await fetch(url);
                                     if (textRes.ok) {
                                         const text = await textRes.text();
+                                        
+                                        // If it's text/plain, verify it actually looks like markdown or is at least a valid text file
+                                        // Check for common markdown signatures if it's text/plain
+                                        const isLookalikeMarkdown = 
+                                            text.trim().startsWith('#') || 
+                                            text.includes('![](') || 
+                                            text.includes('[') && text.includes('](') || 
+                                            text.includes('**') ||
+                                            text.includes('---');
+
+                                        if (contentType?.startsWith('text/plain') && !isLookalikeMarkdown && !url.toLowerCase().endsWith('.md')) {
+                                            // It's just plain text, maybe skip or handle as markdown anyway if it's small
+                                            if (text.length > 5000) return false; 
+                                        }
+
                                         setMarkdownContent(text);
                                         setMediaType('markdown');
                                         return true;
