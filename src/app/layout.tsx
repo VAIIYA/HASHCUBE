@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { SolanaProvider } from "@/components/SolanaProvider";
@@ -40,6 +41,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-metamask-beige`}
       >
         <SolanaProvider>
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8049952818757963"
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
           <div className="flex-grow">
             {children}
           </div>
