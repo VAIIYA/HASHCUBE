@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Hash, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Hash, TrendingUp, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/shared';
 
 interface Hashtag {
     tag: string;
@@ -36,7 +37,7 @@ export default function HashtagsPage() {
     return (
         <div className="min-h-screen bg-metamask-beige p-6 space-y-12">
             <div className="max-w-5xl mx-auto space-y-8">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row md:items-center gap-6">
                     <button
                         onClick={() => router.push('/')}
                         className="flex items-center gap-2 text-metamask-purple/60 hover:text-metamask-purple font-bold transition-colors"
@@ -44,8 +45,21 @@ export default function HashtagsPage() {
                         <ArrowLeft size={18} />
                         Home
                     </button>
-                    <h1 className="text-4xl font-black text-metamask-purple tracking-tight">HASHTAGS</h1>
-                    <div className="w-[80px]" /> {/* Spacer */}
+                    
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <Input
+                            placeholder="Search everything..."
+                            className="pl-12 h-12 rounded-full border-metamask-purple/10 focus:border-metamask-orange/50 transition-all"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    router.push(`/search?q=${encodeURIComponent(e.currentTarget.value)}`);
+                                }
+                            }}
+                        />
+                    </div>
+
+                    <h1 className="text-4xl font-black text-metamask-purple tracking-tight hidden md:block">HASHTAGS</h1>
                 </div>
 
                 {loading ? (

@@ -279,7 +279,7 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                 />
             )}
             {mediaType === 'markdown' && (
-                <div className="w-full p-8 md:p-12 bg-white/80 backdrop-blur-sm max-h-[800px] overflow-y-auto scrollbar-hide">
+                <div className="w-full p-8 md:p-12 bg-white/80 backdrop-blur-sm">
                     <article className="prose prose-sm md:prose-base max-w-none text-metamask-purple/90 
                         [&>h1]:text-3xl [&>h1]:font-black [&>h1]:mb-6 [&>h1]:text-metamask-purple
                         [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:text-metamask-purple/80
