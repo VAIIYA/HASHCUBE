@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { extractCID, extractIPNS, IPFS_GATEWAYS, getGatewayUrl } from '@/lib/ipfs';
 
 interface MediaEmbedProps {
@@ -8,9 +9,10 @@ interface MediaEmbedProps {
 }
 
 export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
-    const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio' | 'twitter' | null>(null);
+    const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio' | 'twitter' | 'markdown' | null>(null);
     const [src, setSrc] = useState<string>('');
     const [html, setHtml] = useState<string>('');
+    const [markdownContent, setMarkdownContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
@@ -113,6 +115,18 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                                 setSrc(url);
                                 setMediaType('audio');
                                 return true;
+                            } else if (contentType?.includes('markdown') || contentType?.startsWith('text/markdown') || url.toLowerCase().endsWith('.md')) {
+                                try {
+                                    const textRes = await fetch(url);
+                                    if (textRes.ok) {
+                                        const text = await textRes.text();
+                                        setMarkdownContent(text);
+                                        setMediaType('markdown');
+                                        return true;
+                                    }
+                                } catch (e) {
+                                    console.warn('Failed to fetch markdown content:', e);
+                                }
                             }
                         }
                     } catch (e) {
@@ -151,6 +165,18 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                         setSrc(fallbackUrl);
                         setMediaType('audio');
                         found = true;
+                    } else if (ext === 'md') {
+                        try {
+                            const textRes = await fetch(fallbackUrl);
+                            if (textRes.ok) {
+                                const text = await textRes.text();
+                                setMarkdownContent(text);
+                                setMediaType('markdown');
+                                found = true;
+                            }
+                        } catch (e) {
+                            console.warn('Failed to fetch markdown content (fallback):', e);
+                        }
                     }
                 }
             }
@@ -206,6 +232,30 @@ export const MediaEmbed: React.FC<MediaEmbedProps> = ({ values }) => {
                     className="w-full max-w-[550px] p-4 bg-white"
                     dangerouslySetInnerHTML={{ __html: html }}
                 />
+            )}
+            {mediaType === 'markdown' && (
+                <div className="w-full p-8 md:p-12 bg-white/80 backdrop-blur-sm max-h-[800px] overflow-y-auto scrollbar-hide">
+                    <article className="prose prose-sm md:prose-base max-w-none text-metamask-purple/90 
+                        [&>h1]:text-3xl [&>h1]:font-black [&>h1]:mb-6 [&>h1]:text-metamask-purple
+                        [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-8 [&>h2]:mb-4 [&>h2]:text-metamask-purple/80
+                        [&>h3]:text-xl [&>h3]:font-bold [&>h3]:mt-6 [&>h3]:mb-3 [&>h3]:text-metamask-purple/70
+                        [&>p]:leading-relaxed [&>p]:mb-4
+                        [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
+                        [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4
+                        [&>blockquote]:border-l-4 [&>blockquote]:border-metamask-orange/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:bg-metamask-orange/5 [&>blockquote]:py-2 [&>blockquote]:rounded-r-lg
+                        [&>pre]:bg-metamask-purple/5 [&>pre]:p-4 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:text-sm [&>pre]:font-mono [&>pre]:border [&>pre]:border-metamask-purple/10
+                        [&>code]:bg-metamask-orange/10 [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:rounded-md [&>code]:text-metamask-orange [&>code]:font-bold [&>code]:text-sm
+                        [&>img]:rounded-2xl [&>img]:shadow-lg [&>img]:mx-auto [&>img]:my-8 [&>img]:max-h-[500px]
+                        [&>a]:text-metamask-blue [&>a]:hover:underline [&>a]:underline-offset-4 [&>a]:decoration-2
+                        [&>hr]:border-t-2 [&>hr]:border-metamask-purple/5 [&>hr]:my-8
+                        [&>table]:w-full [&>table]:mb-6 [&>table]:border-collapse
+                        [&>table_th]:bg-metamask-purple/5 [&>table_th]:p-3 [&>table_th]:text-left [&>table_th]:font-bold [&>table_th]:border [&>table_th]:border-metamask-purple/10
+                        [&>table_td]:p-3 [&>table_td]:border [&>table_td]:border-metamask-purple/10
+                        [&>strong]:text-metamask-purple [&>strong]:font-black
+                    ">
+                        <ReactMarkdown>{markdownContent}</ReactMarkdown>
+                    </article>
+                </div>
             )}
         </div>
     );

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { extractCID, extractIPNS, IPFS_GATEWAYS, getGatewayUrl } from '@/lib/ipfs';
-import { Play } from 'lucide-react';
+import { Play, FileText } from 'lucide-react';
 
 interface ThreadPreviewProps {
     value?: string;
@@ -13,7 +13,7 @@ interface ThreadPreviewProps {
 export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl }) => {
     const [preview, setPreview] = useState<{
         url: string;
-        renderType: 'image' | 'video' | 'audio';
+        renderType: 'image' | 'video' | 'audio' | 'markdown';
         showPlayButton: boolean;
     } | null>(null);
     const [loading, setLoading] = useState(true);
@@ -81,6 +81,13 @@ export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl 
                             showPlayButton: true
                         });
                         return true;
+                    } else if (ext === 'md') {
+                        setPreview({
+                            url,
+                            renderType: 'markdown',
+                            showPlayButton: false
+                        });
+                        return true;
                     }
 
                     try {
@@ -104,6 +111,13 @@ export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl 
                                     url,
                                     renderType: 'audio',
                                     showPlayButton: true
+                                });
+                                return true;
+                            } else if (contentType?.includes('markdown') || contentType?.startsWith('text/markdown')) {
+                                setPreview({
+                                    url,
+                                    renderType: 'markdown',
+                                    showPlayButton: false
                                 });
                                 return true;
                             }
@@ -159,6 +173,13 @@ export const ThreadPreview: React.FC<ThreadPreviewProps> = ({ value, ipns, xUrl 
                     muted
                     playsInline
                 />
+            ) : preview.renderType === 'markdown' ? (
+                <div className="w-full h-full bg-metamask-orange/[0.05] flex flex-col items-center justify-center gap-2 group-hover/preview:bg-metamask-orange/[0.08] transition-colors">
+                    <div className="w-16 h-16 rounded-2xl bg-metamask-orange/10 flex items-center justify-center text-metamask-orange/60 shadow-sm border border-metamask-orange/10 transform group-hover/preview:scale-110 transition-transform duration-500">
+                        <FileText size={32} strokeWidth={1.5} />
+                    </div>
+                    <span className="text-[10px] font-black text-metamask-orange/40 uppercase tracking-[0.2em] mt-2">Article / Text</span>
+                </div>
             ) : (
                 <div className="w-full h-full bg-metamask-purple/[0.05] flex items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-metamask-purple/10 flex items-center justify-center text-metamask-purple/40">
